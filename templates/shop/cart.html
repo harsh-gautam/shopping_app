@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Cart-OnlineStore {% endblock %}
+{% block styling %} 
+.card{
+      border: none;
+      padding: 0;
+}
+.right-card{
+  top: 110px;
+  position: sticky;
+}
+.card-header .card-footer{
+  background-color: white;
+}
+.fprice{
+  color: #878787;
+  text-decoration: line-through;
+}
+
+.heading{
+  font-size: 1.5rem;
+}
+
+.discount{
+  color: #388e3c;
+}
+
+.price{
+  letter-spacing: 1px;
+  display: inline-block;
+}
+
+.card-header{
+  <!-- border-bottom: 1px solid grey; -->
+}
+
+.secondary-txt{
+  font-size: 15px;
+  color: black;
+  padding-right: 25px;
+  font-weight: bold;
+  letter-spacing: 0.5px;  
+}
+.secondary-txt:hover{
+  text-decoration: none;
+  color: #007bff;
+}
+
+.seller{
+  margin-top: -5px;
+  font-size: 1rem;
+  color: gray;
+  font-weight: lighter;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.img-container{
+  width: 150px;
+  height: 125px;
+  padding: 10px;
+}
+
+.quantity{
+  width: 150px;
+  padding: 5px;
+}
+
+.quant-input{
+  -webkit-appearance: none;
+  border: 1px solid grey;
+  text-align: center;
+  width: 35px;
+  height: 35px;
+  font-size: 20px;
+  color: #43484D;
+  font-weight: 300;
+}
+
+.plus-btn:hover, .minus-btn:hover{
+  cursor: pointer;
+  color: #007bff;
+}
+
+.row{
+  border-bottom: 1px solid grey;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+}
+
+{% endblock %}
+
+{% block body %} 
+<script>
+  var products_list = {{ products|safe }};
+</script>
+<div class="container-fluid" style="max-width: 1540px; background-color: rgba(255, 255, 255, 0);">
+    <div class="card-group">
+      <div class="card col-12 col-md-8 mr-2 my-3 left-card shadow">
+        <div class="sticky card-header shadow">
+          <span class="heading">My Cart</span>
+          
+        </div>
+        <div id="product-card" class="card-body" style="border-bottom: 1px solid rgba(194, 193, 193, 0.616);">
+          <!-- Content added dynamically -->
+          <b class="cart-is-empty-text">Your cart is empty. Add some products to it</b>
+        </div>
+      </div>
+
+      <div class="card col-12 col-md-4 ml-2 my-3 right-card shadow sticky-top" style="height: 300px;">
+        <div class="card-header shadow">
+          <span class="heading">Price Details</span>
+        </div>
+        <div class="card-body" >
+            <span class="float-start">Price(<span id="total-item"></span> item)</span><span id="total-amt" class="float-end" style="float: right;">₹</span><br>
+            <!-- <span class="float-start">Discount</span><span class="float-end" style="float: right;">-453</span><br> -->
+            <span class="float-start">Delivery Charges</span><span class="float-end" style="float: right;">FREE</span>
+        </div>
+        <div class="card-footer">
+            <span class="total-amount">Total Amount</span><span class="total-amount-num" style="float: right;">₹</span>
+        </div>
+        <div class="card-footer">
+          <a id='place-order' href="/checkout" class="btn btn-success mx-2 px-4" style="float: right;">PLACE ORDER</a>
+          <button id="btn-empty-cart" class="btn btn-danger mx-2 px-4" style="float: left;">EMPTY CART</button>
+        </div>
+      </div>
+      
+      </div>      
+</div>
+<script src="{% static 'shop/js/cart.js' %}"></script>
+
+{% endblock %}
+
+{% block js %}
+showProducts();
+
+$('.minus-btn').on('click', function(e) {
+  e.preventDefault();
+  var $this = $(this);
+  var $input = $this.closest('div').find('input');
+  var value = parseInt($input.val());
+  id = this.parentNode.parentNode.parentNode.id.toString()
+  if (value > 1) {
+      value = value - 1;
+      cart[id] -= 1;
+      localStorage.setItem('cart', JSON.stringify(cart));
+  } else {
+      value = 1;
+  }
+
+  $input.val(value);
+  window.location = window.location;
+
+});
+
+$('.plus-btn').on('click', function(e) {
+  e.preventDefault();
+  var $this = $(this);
+  var $input = $this.closest('div').find('input');
+  var value = parseInt($input.val());
+  id = this.parentNode.parentNode.parentNode.id.toString()
+  if (value < 100) {
+      value = value + 1;
+      cart[id] += 1;
+      localStorage.setItem('cart', JSON.stringify(cart));
+  } else {
+      value =100;
+  }
+
+  $input.val(value);
+  window.location = window.location;
+});
+
+document.getElementById("btn-empty-cart").addEventListener('click', function(){
+  localStorage.clear();
+  window.location = window.location;
+});
+
+document.getElementById("place-order").addEventListener('click', function(event){
+  if(cart_products.length == 0){
+    alert("Please add some products before making order!");
+    event.preventDefault();
+  }
+});
+
+var remove_items = document.querySelectorAll(".remove-item");
+
+for(var i=0; i < remove_items.length; i++){
+  current = remove_items[i];
+  current.addEventListener('click', function(){
+    delete cart[this.id.toString().slice(12)];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.location = window.location;
+  }, false)
+}
+
+{% endblock %}

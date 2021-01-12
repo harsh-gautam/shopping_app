@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    My Orders - Flopkart
+{% endblock %}
+
+{% block styling %}
+    input[type=email] {
+        border: 0.5px solid #1591ff;
+    }
+
+    #submit{
+        border-radius: 0 0.25rem 0.25rem 0;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 .1rem rgba(0,123,255,.25);
+    }
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid" style="max-width: 1540px; background-color: rgba(255, 255, 255, 0);">
+        <div class="row mb-2">
+            <div class="card col-12">
+                <div class="card-body">
+                    <form id='form' action="/myorders/" method="POST">{% csrf_token %}
+                        <input class="form-control d-inline-block" type="email" name="email" id="email" placeholder="Enter your email" required><button type="submit" id="submit" class="btn btn-primary d-inline-block" style="vertical-align: 0;">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div id="items" class="row">
+            
+        </div>
+
+    </div>
+    
+{% endblock %}
+
+{% block js %}
+    submitBtn = document.getElementById('submit');
+    csrfmiddlewaretoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+    statusDisplayer = document.querySelector('#items')
+
+    function processData(jsonData){
+        jsonData = JSON.parse(jsonData);
+        if(Object.keys(jsonData).length != 0){
+            statusDisplayer.innerHTML = "";
+
+            var node = document.createElement('div');
+            node.classList.add('card');
+            node.classList.add('col-12');
+            var html = '';
+
+            for(let order in jsonData){
+                //console.log(jsonData[order])
+                let products = jsonData[order].products;
+                let totalprice = jsonData[order].totalprice;
+                let updates = jsonData[order].updates;
+                updates = updates = updates.replace(",", "\n");
+
+                //console.log(products)
+                //console.log(totalprice)
+                //console.log(updates)
+
+                html = html.concat(`
+                <div class="row mb-2 shadow">
+                <div class="col-sm-8 p-0" style="border-right: 0.5px solid rgba(0,0,0,.125);">
+                <div class="card-header bg-white">
+                    <span class="heading">Order ID#: ${order}</span>
+                </div>
+                <div class="card-body">
+                    Your order contains item(s) -- 
+                `);
+                for(let product in products){
+                    //console.log(`${products[product].product_name}`);
+                    html = html.concat(`
+                        ${products[product].product_name.toUpperCase()}, 
+                    `);
+                }
+                html = html.concat(`
+                <br>Status: <br> ${updates}
+                </div></div><div class="col-sm-4 p-0 text-center justify-content-center">
+                    <div class="card-body">
+                    <p><b>Price:</b> ${totalprice}</p><br>
+                    <input class="btn btn-primary" type="button" value="Cancel">
+                    </div>
+                </div></div>
+                `);
+                
+            } 
+            //console.log(html);
+            node.innerHTML = html;
+            //console.log(node)
+            statusDisplayer.appendChild(node);
+        }
+        else{
+            statusDisplayer.innerHTML = "<p>Sorry we could not find any orders associated with that email. Please check your email and try again.</p>";
+        }
+        
+    }
+
+    submitBtn.addEventListener('click', (event)=>{
+
+        email = document.querySelector('#email').value;
+        var data = {
+            "email": email
+        };
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/myorders', true);
+        xhr.setRequestHeader('X-CSRFToken', csrfmiddlewaretoken);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+        
+        xhr.onload = function() {
+        if (this.status >= 200 && this.status < 400) {
+            var resp = this.response;
+            //console.log(resp)
+            //console.log(Object.keys(resp).length)
+            processData(resp);
+        } else {
+            console.log('We reached our target server, but it returned an error');
+
+        }
+        };
+
+        xhr.onerror = function() {
+        // There was a connection error of some sort
+        };
+
+        xhr.send(JSON.stringify(data));
+        event.preventDefault();
+
+    });
+{% endblock %}

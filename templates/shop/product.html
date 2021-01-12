@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %} Product-OnlineStore {% endblock %}
+{% block styling %}
+      body{
+            
+      }
+
+      .container{
+            background-color: white;
+      }
+
+      .fprice{
+            color: #878787;
+            text-decoration: line-through;
+      }
+
+      .discount{
+            color: #388e3c;
+      }
+
+      .price{
+            letter-spacing: 1px;
+            display: inline-block;
+      }
+
+      .txt{
+            color: #878787;
+      }
+
+      .input-group{
+            width: 200px;
+            flex: none;
+      }
+
+     .pin:focus{
+            box-shadow: inset 0 -1px 0 #007bff;
+            border-bottom: 2px solid #007bff;
+            border-radius: 0;
+      }
+
+      .btn:focus{
+            box-shadow: inset 0 -2px 0 rgba(255,255,255, 0);
+      }
+
+      .btn-primary{
+            width: 160px;
+            border-radius: 0;
+      }
+      
+      .p-image{
+            width: 100%;
+            height: 80%;
+      }
+
+      .image-container{
+            height: 540px;
+      }
+
+      .btns{
+            margin-top: 50px;
+      }
+      #more {
+            display: none;
+      }
+      #myBtn{
+            color: #007bff;
+      }
+      #myBtn:hover{
+            cursor: pointer;
+      }
+{% endblock %}
+{% block body %} 
+
+      <div class="container-xl py-5">
+            <div class="row">
+                  <div class="image-container col-md-4 p-3">
+                        <img class="mx-auto p-image" src="/media/{{ product.image }}" alt="product image" height="400px">
+                        <div class="btns row">
+                              <button class="btn btn-primary my-3 mx-auto">Buy Now</button>
+                              <button id="pr{{ product.product_id }}" class="cart-btn btn btn-primary my-3 mx-auto">Add To Cart</button>
+                        </div>
+                  </div>
+                  <div class="col-md-8 p-4">
+                        <h3 style="letter-spacing: 1px;">{{ product.product_name|title }}</h3>
+                        <h5>{{ product.rating }} *</h5>
+                        <h4 class="price my-2"><b>₹{{ product.price }}</b></h4><span class="fprice px-2 my-2">₹{{fprice}}</span><span class="discount my-2">{{product.discount}}% off</span>
+
+                        <div class="row my-3">
+                              <div class="col-md-2 txt">Delivery</div>
+                              <div class="col-md-10">
+                                    <div class="input-group">
+                                          <input type="text" class="form-control pin" placeholder="Enter Pincode" aria-label="Enter Pincode" aria-describedby="button-addon2">
+                                          <a class="btn btn-outline-primary" type="button" id="button-addon2" style="border-radius: 0;">Check</a>
+                                    </div>
+                              </div>
+                        </div>
+                        <div class="row my-3">
+                              <div class="col-md-2 txt">Seller</div>
+                              <div class="col-md-10">Ecom Networks</div>
+                        </div>
+                        <div class="row my-3">
+                              <div class="col-md-2 txt">Description</div>
+                              {% if product.product_desc|length > 200 %}
+                                    <div class="col-md-10"><p>{{ product.product_desc|slice:":200"|capfirst }}
+                                          <span id="dots">...</span>
+                                          <span id="more">{{ product.product_desc|slice:"201:"|capfirst }}</span>
+                                          <a onclick="myFunction()" id="myBtn"> read more</a>
+                                    </p></div>
+                              {% endif %}
+                              {% if product.product_desc|length < 200 %}
+                                    <div class="col-md-10"><p>{{ product.product_desc|slice:":500"|capfirst }}</p></div>
+                              {% endif %}
+                        </div>
+
+                  </div>
+            </div>
+      </div>
+
+{% endblock %}
+
+{% block js %}
+    cartButtons = document.getElementsByClassName('cart-btn')
+    for (var i = 0; i < cartButtons.length; i++) {
+      var current = cartButtons[i];
+      current.addEventListener('click', function(){
+          var idStr = this.id.toString()
+          if(cart[idStr] != undefined){
+            cart[idStr] = cart[idStr] + 1
+          } else {
+            cart[idStr] = 1
+          }
+          console.log(cart)
+          localStorage.setItem('cart', JSON.stringify(cart))
+          document.getElementById('cart-items').innerHTML = Object.keys(cart).length
+        }, false);
+    }
+    
+    // add_to_cart.addEventListener('click', , false)
+
+    function myFunction() {
+      var dots = document.getElementById("dots");
+      var moreText = document.getElementById("more");
+      var btnText = document.getElementById("myBtn");
+    
+      if (dots.style.display === "none") {
+        dots.style.display = "inline";
+        btnText.innerHTML = "Read more";
+        moreText.style.display = "none";
+      } else {
+        dots.style.display = "none";
+        btnText.innerHTML = "Read less";
+        moreText.style.display = "inline";
+      }
+    } 
+
+{% endblock %}
